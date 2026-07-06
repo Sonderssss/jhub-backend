@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JHUB Africa — API Testing Playground</title>
+  
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Outfit', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f172a 50%, #020617 100%);
+      background-attachment: fixed;
+    }
+    .glass {
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="h-full font-sans antialiased overflow-x-hidden custom-scrollbar">
+
+  <div class="min-h-full flex flex-col">
+    <!-- Header -->
+    <header class="glass sticky top-0 z-50 border-b border-white/5 py-4 px-6 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center font-bold text-white shadow-lg shadow-brand-500/20">J</div>
+        <div>
+          <h1 class="text-lg font-bold text-white tracking-wide">JHUB Africa</h1>
+          <p class="text-xs text-slate-400">Interactive Testing Playground</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-2 bg-slate-900/60 border border-white/5 rounded-full px-4 py-1.5 text-xs text-slate-300">
+          <span class="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
+          <span>API: <b>http://localhost:4000/api/v1</b></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Left sidebar: Tab switches & Actions -->
+      <section class="lg:col-span-4 flex flex-col space-y-6">
+        
+        <!-- Controls Card -->
+        <div class="glass rounded-2xl p-5 shadow-xl">
+          <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">Operations Dashboard</h2>
+          
+          <div class="flex flex-col space-y-2">
+            <button onclick="switchTab('forms')" id="btn-tab-forms" class="w-full text-left px-4 py-3 rounded-xl transition flex items-center justify-between bg-brand-600 text-white shadow-lg shadow-brand-600/10">
+              <span class="flex items-center space-x-3">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span>Frontend Forms (Post)</span>
+              </span>
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+
+            <button onclick="switchTab('explorer')" id="btn-tab-explorer" class="w-full text-left px-4 py-3 rounded-xl transition flex items-center justify-between hover:bg-white/5 text-slate-400">
+              <span class="flex items-center space-x-3">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <span>Cache, Searches & Pagination</span>
+              </span>
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+
+            <button onclick="switchTab('logs')" id="btn-tab-logs" class="w-full text-left px-4 py-3 rounded-xl transition flex items-center justify-between hover:bg-white/5 text-slate-400">
+              <span class="flex items-center space-x-3">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                <span>Real-time DB Logger</span>
+              </span>
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Testing utilities -->
+        <div class="glass rounded-2xl p-5 shadow-xl flex flex-col space-y-4">
+          <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider">Playground Diagnostics</h3>
+          
+          <!-- Latency Gauge -->
+          <div class="bg-slate-950/60 rounded-xl p-4 border border-white/5">
+            <div class="text-xs text-slate-400 mb-1">API Round-trip Speed</div>
+            <div class="flex items-baseline space-x-2">
+              <span id="txt-latency" class="text-2xl font-bold text-white">0</span>
+              <span class="text-xs text-slate-400">ms</span>
+            </div>
+            <div id="badge-cache" class="mt-2 text-[10px] inline-block font-semibold px-2 py-0.5 rounded uppercase tracking-wider bg-slate-800 text-slate-400">Waiting for call</div>
+          </div>
+
+          <!-- Rate Limiter simulator -->
+          <div class="bg-slate-950/60 rounded-xl p-4 border border-white/5 flex flex-col space-y-3">
+            <div>
+              <h4 class="text-xs font-semibold text-slate-200">Rate Limiting Simulator</h4>
+              <p class="text-[10px] text-slate-400 mt-0.5">Spams 15 requests in parallel to trigger rate limits (429).</p>
+            </div>
+            <button onclick="triggerRateLimitSim()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg py-2 text-xs font-medium transition shadow-lg shadow-indigo-600/10">
+              Spam API (Simulate Block)
+            </button>
+            <div id="txt-ratelimit-status" class="text-xs text-slate-400 hidden"></div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Right Panel: View container -->
+      <section class="lg:col-span-8 flex flex-col space-y-6">
+        
+        <!-- View 1: Forms -->
+        <div id="view-forms" class="glass rounded-3xl p-6 md:p-8 shadow-xl flex flex-col space-y-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-5">
+            <div>
+              <h2 class="text-xl font-bold text-white">Inquiry Form Submissions</h2>
+              <p class="text-xs text-slate-400 mt-1">Select one of the 6 specialized frontend forms to validate payload fields and populate the DB.</p>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+              <select id="select-form-type" onchange="loadFormFields()" class="bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+                <option value="innovation">1. Innovation Submission</option>
+                <option value="sponsor">2. Sponsor Inquiry</option>
+                <option value="partner">3. Partner Inquiry</option>
+                <option value="courses">4. Course Interest</option>
+                <option value="events">5. Event Registration</option>
+                <option value="contact">6. General Contact</option>
+              </select>
+              <button onclick="populateFormMock()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl text-xs font-medium transition">
+                Pre-Fill Mock
+              </button>
+            </div>
+          </div>
+
+          <!-- Dynamic Form Container -->
+          <form id="dynamic-form" onsubmit="submitForm(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Fields generated dynamically -->
+          </form>
+
+          <!-- Form Action buttons -->
+          <div class="border-t border-white/5 pt-5 flex items-center justify-between">
+            <div id="txt-submit-status" class="text-xs font-medium"></div>
+            <button type="submit" form="dynamic-form" class="bg-brand-500 hover:bg-brand-600 text-white rounded-xl px-6 py-3 text-xs font-bold transition shadow-lg shadow-brand-500/20">
+              Submit Form Payload
+            </button>
+          </div>
+
+          <!-- Raw Request/Response log -->
+          <div class="flex flex-col space-y-2 mt-4">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Raw API Response Log</span>
+            <pre id="pre-form-log" class="bg-slate-950/80 border border-white/5 rounded-xl p-4 text-[11px] font-mono text-emerald-400 overflow-x-auto max-h-48 custom-scrollbar">No request made yet.</pre>
+          </div>
+        </div>
+
+        <!-- View 2: Cache, Searches & Pagination -->
+        <div id="view-explorer" class="glass rounded-3xl p-6 md:p-8 shadow-xl flex flex-col space-y-6 hidden">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-5">
+            <div>
+              <h2 class="text-xl font-bold text-white">Cache & Pagination Explorer</h2>
+              <p class="text-xs text-slate-400 mt-1">Queries public listing routes. Click repeatedly to test Redis memory cache hits (⚡ latencies &lt; 50ms) vs direct DB fetches.</p>
+            </div>
+            
+            <select id="select-explore-type" onchange="exploreData()" class="bg-slate-900 border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+              <option value="courses">Explore Courses (GET /courses)</option>
+              <option value="courses-featured">Explore Featured Courses (GET /courses/featured)</option>
+              <option value="events">Explore Events (GET /events)</option>
+              <option value="events-upcoming">Explore Upcoming Events (GET /events/upcoming)</option>
+              <option value="innovations">Explore Innovations (GET /innovations)</option>
+              <option value="innovations-featured">Explore Featured Innovations (GET /innovations/featured)</option>
+            </select>
+          </div>
+
+          <!-- Filters bar -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end bg-slate-950/40 p-4 rounded-xl border border-white/5">
+            <div class="flex flex-col space-y-1">
+              <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Keyword Search</label>
+              <input type="text" id="txt-explore-search" placeholder="Filter by title..." class="bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+            </div>
+            
+            <div class="flex flex-col space-y-1">
+              <label class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Page Limit (Page Size)</label>
+              <select id="select-explore-limit" class="bg-slate-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+                <option value="2">2 records per page</option>
+                <option value="5">5 records per page</option>
+                <option value="10" selected>10 records per page</option>
+              </select>
+            </div>
+
+            <button onclick="exploreData()" class="bg-brand-500 hover:bg-brand-600 text-white rounded-lg py-2 text-xs font-semibold transition">
+              Refresh Query
+            </button>
+          </div>
+
+          <!-- Explore Data Results -->
+          <div class="overflow-x-auto border border-white/5 rounded-2xl bg-slate-950/20">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-slate-900/60 text-slate-300 border-b border-white/5">
+                  <th class="p-3">ID / Slug</th>
+                  <th class="p-3">Title / Name</th>
+                  <th class="p-3">Category / Mode / Stage</th>
+                  <th class="p-3">Featured?</th>
+                </tr>
+              </thead>
+              <tbody id="table-explore-body" class="divide-y divide-white/5 text-slate-300">
+                <!-- Rows load dynamic -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Controls -->
+          <div class="flex items-center justify-between border-t border-white/5 pt-4">
+            <span id="txt-explore-pagination" class="text-xs text-slate-400">Page 1 of 1 (0 Total records)</span>
+            <div class="flex items-center space-x-2">
+              <button onclick="changePage(-1)" id="btn-explore-prev" class="bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold transition disabled:opacity-30 disabled:cursor-not-allowed">Previous</button>
+              <button onclick="changePage(1)" id="btn-explore-next" class="bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold transition disabled:opacity-30 disabled:cursor-not-allowed">Next</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- View 3: Logs logger -->
+        <div id="view-logs" class="glass rounded-3xl p-6 md:p-8 shadow-xl flex flex-col space-y-6 hidden">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-5">
+            <div>
+              <h2 class="text-xl font-bold text-white">Database Log Entries</h2>
+              <p class="text-xs text-slate-400 mt-1">Fetches direct database record logs from your Supabase client to confirm submissions are safely inserted.</p>
+            </div>
+            
+            <button onclick="loadDatabaseLogs()" class="bg-brand-500 hover:bg-brand-600 text-white rounded-xl px-4 py-2 text-xs font-semibold transition">
+              Refresh DB Logs
+            </button>
+          </div>
+
+          <!-- Interactive DB log selector tabs -->
+          <div class="flex space-x-2 border-b border-white/5 pb-2 overflow-x-auto custom-scrollbar">
+            <button onclick="switchLogTable('submissions')" id="btn-log-submissions" class="text-xs px-3 py-2 rounded-lg font-medium bg-slate-800 text-white">1. Innovation Submissions</button>
+            <button onclick="switchLogTable('applications')" id="btn-log-applications" class="text-xs px-3 py-2 rounded-lg font-medium hover:bg-white/5 text-slate-400">2. applications (Partner/Sponsor)</button>
+            <button onclick="switchLogTable('inquiries')" id="btn-log-inquiries" class="text-xs px-3 py-2 rounded-lg font-medium hover:bg-white/5 text-slate-400">3. contact_inquiries (Course/General)</button>
+            <button onclick="switchLogTable('rsvps')" id="btn-log-rsvps" class="text-xs px-3 py-2 rounded-lg font-medium hover:bg-white/5 text-slate-400">4. event_rsvps (Registrations)</button>
+          </div>
+
+          <!-- Logs Output -->
+          <div class="overflow-x-auto border border-white/5 rounded-2xl bg-slate-950/20 max-h-96 custom-scrollbar">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead id="table-log-header" class="bg-slate-900/60 text-slate-300 border-b border-white/5">
+                <!-- Dynamic header -->
+              </thead>
+              <tbody id="table-log-body" class="divide-y divide-white/5 text-slate-300 font-mono">
+                <tr><td colspan="4" class="p-4 text-center text-slate-500">Click Refresh DB Logs to load data.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const API_BASE = '/api/v1';
+    let explorePage = 1;
+    let currentLogsTab = 'submissions';
+    let dbLogsData = { submissions: [], applications: [], inquiries: [], rsvps: [] };
+
+    // Standard Mock Data Store
+    const mocks = {
+      innovation: {
+        contactName: "John Doe",
+        contactEmail: "john@innovations.io",
+        phone: "+254712345678",
+        title: "JHub AgriTech platform",
+        sector: "Agriculture",
+        stage: "PROTOTYPE",
+        problem: "Smallholder farmers struggle to track soil health in real-time.",
+        solution: "A low-cost IoT soil moisture sensor linked to a mobile application.",
+        supportRequired: "Mentorship, technical validation, and prototype funding.",
+        teamInfo: "3 co-founders: John Doe (IoT Dev), Jane Smith (Agronomist), Alice Wanjiku (UX/UI).",
+        projectLinks: "https://github.com/jhub-agritech",
+        attachmentUrl: "https://jhubafrica.com/pitch.pdf",
+        innovationId: ""
+      },
+      sponsor: {
+        sponsorName: "Funder Ventures Africa",
+        sponsorEmail: "invest@funderventures.com",
+        organization: "Funder Ventures LLC",
+        interestArea: "Climate Action & AgriTech",
+        innovationId: "",
+        sponsorshipType: "Financial Grant & Mentorship",
+        budgetRange: "KES 2,000,000 - KES 5,000,000",
+        expectedOutcome: "Support 10 local agritech prototypes to launch pilots.",
+        preferredContactMethod: "email",
+        message: "We are looking forward to collaborating with JHub Africa cohort developers."
+      },
+      partner: {
+        organizationName: "Kenyatta Academic Institute",
+        partnershipType: "Academic Research",
+        sector: "Education",
+        proposedCollaboration: "Joint research publication and exchange program for student innovators.",
+        expectedTimeline: "12 Months",
+        contactName: "Dr. Albert Ndwiga",
+        contactEmail: "albert.n@jkuat.ac.ke",
+        contactPhone: "+254788888888"
+      },
+      courses: {
+        name: "Brian Kiprop",
+        email: "brian.kip@gmail.com",
+        phone: "+254733333333",
+        courseId: "", // will load dynamically
+        preferredCohort: "Cohort 2026-B",
+        preferredLearningMode: "ONLINE",
+        eligibilityDetails: "Computer Science third-year student with basic Python knowledge.",
+        paymentReadiness: true
+      },
+      events: {
+        guestName: "Stacy Kemunto",
+        guestEmail: "stacy@kemunto.me",
+        guestPhone: "+254744444444",
+        affiliation: "Student Affiliated",
+        dietaryRequirements: "Vegetarian",
+        accessibilityRequirements: "None",
+        marketingConsent: true,
+        eventId: "" // will load dynamically
+      },
+      contact: {
+        name: "Alex Mwangi",
+        email: "alex@mwangi.co.ke",
+        phone: "+254755555555",
+        category: "GENERAL",
+        subject: "Collaboration opportunities for youth training",
+        message: "We want to inquire about the next open registration timeline for youth maker space hubs.",
+        preferredResponseChannel: "whatsapp"
+      }
+    };
+
+    // Form fields structures
+    const formFieldsConfig = {
+      innovation: [
+        { name: 'contactName', label: 'Full Name', type: 'text', required: true },
+        { name: 'contactEmail', label: 'Email Address', type: 'email', required: true },
+        { name: 'phone', label: 'Phone Number', type: 'text', required: true },
+        { name: 'title', label: 'Project Name', type: 'text', required: true },
+        { name: 'sector', label: 'Sector', type: 'text', required: true },
+        { name: 'stage', label: 'Development Stage', type: 'select', options: ['IDEA', 'PROTOTYPE', 'PILOT', 'SCALING', 'MATURE'], required: true },
+        { name: 'problem', label: 'Problem Addressed', type: 'textarea', required: true },
+        { name: 'solution', label: 'Proposed Solution', type: 'textarea', required: true },
+        { name: 'supportRequired', label: 'Support Needed', type: 'textarea', required: true },
+        { name: 'teamInfo', label: 'Team Information', type: 'textarea', required: true },
+        { name: 'projectLinks', label: 'Project Links (Optional)', type: 'text' },
+        { name: 'attachmentUrl', label: 'Optional File Link (URL)', type: 'text' },
+        { name: 'innovationId', label: 'Existing Innovation ID (UUID/Optional)', type: 'text' }
+      ],
+      sponsor: [
+        { name: 'sponsorName', label: 'Full Name', type: 'text', required: true },
+        { name: 'sponsorEmail', label: 'Email Address', type: 'email', required: true },
+        { name: 'organization', label: 'Organisation', type: 'text', required: true },
+        { name: 'interestArea', label: 'Interest Area', type: 'text', required: true },
+        { name: 'innovationId', label: 'Project of Interest (Innovation ID/Optional)', type: 'text' },
+        { name: 'sponsorshipType', label: 'Sponsorship Type', type: 'text', required: true },
+        { name: 'budgetRange', label: 'Budget Range (Optional)', type: 'text' },
+        { name: 'expectedOutcome', label: 'Expected Outcome', type: 'textarea', required: true },
+        { name: 'preferredContactMethod', label: 'Preferred Contact Method', type: 'select', options: ['email', 'phone', 'whatsapp'], required: true },
+        { name: 'message', label: 'Additional Message (Optional)', type: 'textarea' }
+      ],
+      partner: [
+        { name: 'organizationName', label: 'Organisation Name', type: 'text', required: true },
+        { name: 'partnershipType', label: 'Partnership Type', type: 'text', required: true },
+        { name: 'sector', label: 'Sector', type: 'text', required: true },
+        { name: 'proposedCollaboration', label: 'Proposed Collaboration', type: 'textarea', required: true },
+        { name: 'expectedTimeline', label: 'Expected Timeline', type: 'text', required: true },
+        { name: 'contactName', label: 'Representative Name', type: 'text', required: true },
+        { name: 'contactEmail', label: 'Representative Email', type: 'email', required: true },
+        { name: 'contactPhone', label: 'Representative Phone', type: 'text', required: true }
+      ],
+      courses: [
+        { name: 'courseId', label: 'Course of Interest (Course UUID)', type: 'text', required: true },
+        { name: 'name', label: 'Full Name', type: 'text', required: true },
+        { name: 'email', label: 'Email Address', type: 'email', required: true },
+        { name: 'phone', label: 'Phone Number', type: 'text', required: true },
+        { name: 'preferredCohort', label: 'Preferred Cohort', type: 'text', required: true },
+        { name: 'preferredLearningMode', label: 'Preferred Learning Mode', type: 'select', options: ['IN_PERSON', 'ONLINE', 'HYBRID'], required: true },
+        { name: 'eligibilityDetails', label: 'Eligibility details', type: 'textarea', required: true },
+        { name: 'paymentReadiness', label: 'Payment Readiness (Ready to pay on cohort confirmation)', type: 'checkbox' }
+      ],
+      events: [
+        { name: 'eventId', label: 'Event Registration Target (Event ID/URL Param)', type: 'text', required: true },
+        { name: 'guestName', label: 'Attendee Name', type: 'text', required: true },
+        { name: 'guestEmail', label: 'Email Address', type: 'email', required: true },
+        { name: 'guestPhone', label: 'Phone Number', type: 'text', required: true },
+        { name: 'affiliation', label: 'Role or Affiliation', type: 'text', required: true },
+        { name: 'dietaryRequirements', label: 'Dietary Requirements (Optional)', type: 'text' },
+        { name: 'accessibilityRequirements', label: 'Accessibility Accommodations (Optional)', type: 'text' },
+        { name: 'marketingConsent', label: 'Consent to receive future updates', type: 'checkbox' }
+      ],
+      contact: [
+        { name: 'name', label: 'Full Name', type: 'text', required: true },
+        { name: 'email', label: 'Email Address', type: 'email', required: true },
+        { name: 'phone', label: 'Phone Number', type: 'text', required: true },
+        { name: 'category', label: 'Inquiry Category', type: 'select', options: ['GENERAL', 'INCUBATION', 'MEDIA', 'OTHER'], required: true },
+        { name: 'subject', label: 'Subject (Optional)', type: 'text' },
+        { name: 'message', label: 'Message', type: 'textarea', required: true },
+        { name: 'preferredResponseChannel', label: 'Preferred Response Channel', type: 'select', options: ['email', 'phone', 'whatsapp'], required: true }
+      ]
+    };
+
+    // Tab switcher
+    function switchTab(tabId) {
+      document.getElementById('view-forms').classList.add('hidden');
+      document.getElementById('view-explorer').classList.add('hidden');
+      document.getElementById('view-logs').classList.add('hidden');
+
+      document.getElementById('btn-tab-forms').className = "w-full text-left px-4 py-3 rounded-xl transition flex items-center justify-between hover:bg-white/5 text-slate-400";
+      document.getElementById('btn-tab-explorer').className = "w-full text-left px-4 py-3 rounded-xl transition flex items-center justify-between hover:bg-white/5 text-slate-400";
+      document.getElementById('btn-tab-logs').className = "w-full text-left px-4 py-3 rounded-xl transition flex items-center justify-between hover:bg-white/5 text-slate-400";
+
+      document.getElementById(`view-${tabId}`).classList.remove('hidden');
+      document.getElementById(`btn-tab-${tabId}`).className = "w-full text-left px-4 py-3 rounded-xl transition flex items-center justify-between bg-brand-600 text-white shadow-lg shadow-brand-600/10";
+      
+      if (tabId === 'explorer') exploreData();
+      if (tabId === 'logs') loadDatabaseLogs();
+    }
+
+    // Dynamic Form Field Builder
+    function loadFormFields() {
+      const type = document.getElementById('select-form-type').value;
+      const fields = formFieldsConfig[type];
+      const formEl = document.getElementById('dynamic-form');
+      formEl.innerHTML = '';
+
+      fields.forEach(f => {
+        const colClass = f.type === 'textarea' ? 'md:col-span-2' : '';
+        let fieldHtml = `
+          <div class="flex flex-col space-y-1.5 ${colClass}">
+            <label class="text-xs font-semibold text-slate-400">${f.label} ${f.required ? '<span class="text-red-400">*</span>' : ''}</label>
+        `;
+
+        if (f.type === 'select') {
+          fieldHtml += `
+            <select name="${f.name}" id="field-${f.name}" ${f.required ? 'required' : ''} class="bg-slate-900/80 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500">
+              ${f.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+            </select>
+          `;
+        } else if (f.type === 'textarea') {
+          fieldHtml += `
+            <textarea name="${f.name}" id="field-${f.name}" rows="3" ${f.required ? 'required' : ''} class="bg-slate-900/80 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500"></textarea>
+          `;
+        } else if (f.type === 'checkbox') {
+          fieldHtml = `
+            <div class="flex items-center space-x-3 md:col-span-2 py-2">
+              <input type="checkbox" name="${f.name}" id="field-${f.name}" class="h-4 w-4 bg-slate-900 border border-white/10 text-brand-500 rounded focus:ring-0">
+              <label for="field-${f.name}" class="text-xs font-semibold text-slate-300 cursor-pointer">${f.label}</label>
+            </div>
+          `;
+        } else {
+          fieldHtml += `
+            <input type="${f.type}" name="${f.name}" id="field-${f.name}" ${f.required ? 'required' : ''} class="bg-slate-900/80 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500">
+          `;
+        }
+
+        if (f.type !== 'checkbox') {
+          fieldHtml += `</div>`;
+        }
+
+        formEl.innerHTML += fieldHtml;
+      });
+    }
+
+    // Populate mock fields
+    async function populateFormMock() {
+      const type = document.getElementById('select-form-type').value;
+      const mockData = mocks[type];
+      
+      // Auto resolve active course ID or event ID if needed
+      if (type === 'courses' && !mockData.courseId) {
+        const res = await fetch(`${API_BASE}/courses?limit=1`);
+        const body = await res.json();
+        if (body.data && body.data.length > 0) {
+          mockData.courseId = body.data[0].id;
+        }
+      }
+      if (type === 'events' && !mockData.eventId) {
+        const res = await fetch(`${API_BASE}/events?limit=1`);
+        const body = await res.json();
+        if (body.data && body.data.length > 0) {
+          mockData.eventId = body.data[0].id;
+        }
+      }
+
+      Object.keys(mockData).forEach(key => {
+        const input = document.getElementById(`field-${key}`);
+        if (input) {
+          if (input.type === 'checkbox') {
+            input.checked = mockData[key];
+          } else {
+            input.value = mockData[key];
+          }
+        }
+      });
+    }
+
+    // Measure latency
+    function updateLatencyUI(start, isCacheable = false) {
+      const duration = Date.now() - start;
+      const latencyEl = document.getElementById('txt-latency');
+      const badgeEl = document.getElementById('badge-cache');
+
+      latencyEl.textContent = duration;
+
+      if (duration < 55 && isCacheable) {
+        badgeEl.textContent = "⚡ Cache Hit (Upstash Redis)";
+        badgeEl.className = "mt-2 text-[10px] inline-block font-bold px-2 py-0.5 rounded bg-emerald-900/50 text-emerald-400 border border-emerald-500/20";
+      } else {
+        badgeEl.textContent = "🐢 Database Query";
+        badgeEl.className = "mt-2 text-[10px] inline-block font-bold px-2 py-0.5 rounded bg-amber-900/50 text-amber-400 border border-amber-500/20";
+      }
+    }
+
+    // Submit form payload
+    async function submitForm(e) {
+      e.preventDefault();
+      const type = document.getElementById('select-form-type').value;
+      const fields = formFieldsConfig[type];
+      const payload = {};
+
+      fields.forEach(f => {
+        const el = document.getElementById(`field-${f.name}`);
+        if (el) {
+          if (el.type === 'checkbox') {
+            payload[f.name] = el.checked;
+          } else {
+            payload[f.name] = el.value;
+          }
+        }
+      });
+
+      let endpoint = '';
+      if (type === 'innovation') endpoint = `${API_BASE}/innovations/submit`;
+      if (type === 'sponsor') endpoint = `${API_BASE}/partners/sponsor`;
+      if (type === 'partner') endpoint = `${API_BASE}/partners/apply`;
+      if (type === 'courses') endpoint = `${API_BASE}/courses/interest`;
+      if (type === 'events') endpoint = `${API_BASE}/events/${payload.eventId}/rsvp`;
+      if (type === 'contact') endpoint = `${API_BASE}/contact`;
+
+      const start = Date.now();
+      const statusEl = document.getElementById('txt-submit-status');
+      const preLog = document.getElementById('pre-form-log');
+      
+      statusEl.textContent = "Sending submission...";
+      statusEl.className = "text-xs font-semibold text-slate-400";
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        updateLatencyUI(start, false);
+        const data = await res.json();
+        
+        preLog.textContent = `HTTP ${res.status}\n` + JSON.stringify(data, null, 2);
+
+        if (res.ok) {
+          statusEl.textContent = "Success! Inquiry saved and Lead notified.";
+          statusEl.className = "text-xs font-semibold text-emerald-400";
+        } else {
+          statusEl.textContent = `Failed (HTTP ${res.status})`;
+          statusEl.className = "text-xs font-semibold text-rose-400";
+        }
+      } catch (err) {
+        statusEl.textContent = "Connection Refused";
+        statusEl.className = "text-xs font-semibold text-rose-400";
+        preLog.textContent = err.message;
+      }
+    }
+
+    // Rate limiter trigger
+    async function triggerRateLimitSim() {
+      const type = 'contact';
+      const payload = mocks.contact;
+      const statusEl = document.getElementById('txt-ratelimit-status');
+      statusEl.classList.remove('hidden');
+      statusEl.textContent = "Bombarding contact endpoint with 15 parallel requests...";
+      statusEl.className = "text-xs text-slate-300 font-semibold";
+
+      const requests = [];
+      for (let i = 0; i < 15; i++) {
+        requests.push(fetch(`${API_BASE}/contact`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }));
+      }
+
+      try {
+        const responses = await Promise.all(requests);
+        let blocked = 0;
+        let ok = 0;
+
+        responses.forEach(r => {
+          if (r.status === 429) blocked++;
+          else if (r.ok) ok++;
+        });
+
+        statusEl.textContent = `Completed: ${ok} Successes, ${blocked} Rate Limited (HTTP 429 - Blocked).`;
+        if (blocked > 0) {
+          statusEl.className = "text-xs text-amber-400 font-bold border border-amber-500/20 bg-amber-500/5 p-2.5 rounded-lg";
+        } else {
+          statusEl.className = "text-xs text-emerald-400 font-bold border border-emerald-500/20 bg-emerald-500/5 p-2.5 rounded-lg";
+        }
+      } catch (err) {
+        statusEl.textContent = `Refused: ${err.message}`;
+        statusEl.className = "text-xs text-rose-400 font-semibold";
+      }
+    }
+
+    // Explore / Queries Loader
+    async function exploreData() {
+      const type = document.getElementById('select-explore-type').value;
+      const search = document.getElementById('txt-explore-search').value;
+      const limit = document.getElementById('select-explore-limit').value;
+
+      let endpoint = `${API_BASE}/courses`;
+      let isCacheable = false;
+
+      if (type === 'courses') {
+        endpoint = `${API_BASE}/courses?page=${explorePage}&limit=${limit}&search=${encodeURIComponent(search)}`;
+      } else if (type === 'courses-featured') {
+        endpoint = `${API_BASE}/courses/featured`;
+        isCacheable = true;
+      } else if (type === 'events') {
+        endpoint = `${API_BASE}/events?page=${explorePage}&limit=${limit}`;
+      } else if (type === 'events-upcoming') {
+        endpoint = `${API_BASE}/events/upcoming`;
+        isCacheable = true;
+      } else if (type === 'innovations') {
+        endpoint = `${API_BASE}/innovations?page=${explorePage}&limit=${limit}&search=${encodeURIComponent(search)}`;
+      } else if (type === 'innovations-featured') {
+        endpoint = `${API_BASE}/innovations/featured`;
+        isCacheable = true;
+      }
+
+      const start = Date.now();
+      const tbody = document.getElementById('table-explore-body');
+      tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-500">Querying API...</td></tr>';
+
+      try {
+        const res = await fetch(endpoint);
+        updateLatencyUI(start, isCacheable);
+        const body = await res.json();
+
+        tbody.innerHTML = '';
+        const items = body.data || body; // support raw array or paginated object
+
+        if (!items || items.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-500">No records found matching filters.</td></tr>';
+          return;
+        }
+
+        items.forEach(item => {
+          tbody.innerHTML += `
+            <tr class="hover:bg-white/5 transition">
+              <td class="p-3 font-mono text-slate-400 text-[10px]">${item.id.substring(0, 8)}...<br><span class="text-[9px] text-slate-500">${item.slug || 'N/A'}</span></td>
+              <td class="p-3 font-semibold text-slate-200">${item.title || item.name}</td>
+              <td class="p-3"><span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px] font-semibold">${item.category || item.delivery_mode || item.type || item.stage}</span></td>
+              <td class="p-3 text-center">${item.is_featured ? '⭐ Yes' : 'No'}</td>
+            </tr>
+          `;
+        });
+
+        // Set pagination meta
+        const meta = body.meta;
+        const pageTxt = document.getElementById('txt-explore-pagination');
+        if (meta) {
+          pageTxt.textContent = `Page ${meta.page} of ${meta.totalPages || 1} (${meta.total || items.length} Total records)`;
+          document.getElementById('btn-explore-prev').disabled = meta.page <= 1;
+          document.getElementById('btn-explore-next').disabled = meta.page >= meta.totalPages;
+        } else {
+          pageTxt.textContent = `${items.length} records loaded (caching route)`;
+          document.getElementById('btn-explore-prev').disabled = true;
+          document.getElementById('btn-explore-next').disabled = true;
+        }
+
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-rose-400">Failed to query: ${err.message}</td></tr>`;
+      }
+    }
+
+    function changePage(delta) {
+      explorePage += delta;
+      exploreData();
+    }
+
+    // Switch Logs Table
+    function switchLogTable(table) {
+      currentLogsTab = table;
+      ['submissions', 'applications', 'inquiries', 'rsvps'].forEach(t => {
+        const btn = document.getElementById(`btn-log-${t}`);
+        if (t === table) {
+          btn.className = "text-xs px-3 py-2 rounded-lg font-medium bg-slate-800 text-white";
+        } else {
+          btn.className = "text-xs px-3 py-2 rounded-lg font-medium hover:bg-white/5 text-slate-400";
+        }
+      });
+      renderLogTableData();
+    }
+
+    // Load Database Logs
+    async function loadDatabaseLogs() {
+      const tbody = document.getElementById('table-log-body');
+      tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-500">Connecting to database...</td></tr>';
+      
+      try {
+        const res = await fetch('/playground-data');
+        dbLogsData = await res.json();
+        renderLogTableData();
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-rose-400">Database connection error: ${err.message}</td></tr>`;
+      }
+    }
+
+    function renderLogTableData() {
+      const head = document.getElementById('table-log-header');
+      const body = document.getElementById('table-log-body');
+      
+      head.innerHTML = '';
+      body.innerHTML = '';
+
+      if (currentLogsTab === 'submissions') {
+        head.innerHTML = `
+          <tr class="bg-slate-900/60 text-slate-300 border-b border-white/5">
+            <th class="p-3">Innovator Name</th>
+            <th class="p-3">Project Title</th>
+            <th class="p-3">Sector</th>
+            <th class="p-3">Stage</th>
+            <th class="p-3">Support</th>
+          </tr>
+        `;
+        const data = dbLogsData.submissions || [];
+        if (data.length === 0) {
+          body.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">No submissions found in table innovation_submissions.</td></tr>';
+          return;
+        }
+        data.forEach(row => {
+          body.innerHTML += `
+            <tr class="hover:bg-white/5 transition">
+              <td class="p-3 font-semibold text-slate-300">${row.contact_name}<br><span class="text-[9px] text-slate-500">${row.contact_email}</span></td>
+              <td class="p-3 text-slate-200">${row.title || 'N/A'}</td>
+              <td class="p-3">${row.sector || 'N/A'}</td>
+              <td class="p-3"><span class="bg-blue-950 text-blue-300 px-2 py-0.5 rounded text-[10px] font-semibold">${row.stage || 'N/A'}</span></td>
+              <td class="p-3 truncate max-w-xs text-slate-400">${row.support_required || 'N/A'}</td>
+            </tr>
+          `;
+        });
+      } else if (currentLogsTab === 'applications') {
+        head.innerHTML = `
+          <tr class="bg-slate-900/60 text-slate-300 border-b border-white/5">
+            <th class="p-3">Applicant Name</th>
+            <th class="p-3">Organisation</th>
+            <th class="p-3">Type</th>
+            <th class="p-3">Details (Coded fields)</th>
+          </tr>
+        `;
+        const data = dbLogsData.applications || [];
+        if (data.length === 0) {
+          body.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-500">No applications found in table applications.</td></tr>';
+          return;
+        }
+        data.forEach(row => {
+          const detail = row.type === 'partnership' 
+            ? `Phone: ${row.contact_phone || 'N/A'}<br>Timeline: ${row.expected_timeline || 'N/A'}` 
+            : `Outcome: ${row.expected_outcome || 'N/A'}<br>Budget: ${row.budget_range || 'N/A'}`;
+          body.innerHTML += `
+            <tr class="hover:bg-white/5 transition">
+              <td class="p-3 font-semibold text-slate-300">${row.applicant_name}<br><span class="text-[9px] text-slate-500">${row.applicant_email}</span></td>
+              <td class="p-3 text-slate-200">${row.organization || 'N/A'}</td>
+              <td class="p-3"><span class="bg-indigo-950 text-indigo-300 px-2 py-0.5 rounded text-[10px] font-semibold">${row.type}</span></td>
+              <td class="p-3 text-slate-400 text-xs">${detail}</td>
+            </tr>
+          `;
+        });
+      } else if (currentLogsTab === 'inquiries') {
+        head.innerHTML = `
+          <tr class="bg-slate-900/60 text-slate-300 border-b border-white/5">
+            <th class="p-3">Sender Name</th>
+            <th class="p-3">Category / Subject</th>
+            <th class="p-3">Mode / Cohort</th>
+            <th class="p-3">Payment / Channel</th>
+          </tr>
+        `;
+        const data = dbLogsData.inquiries || [];
+        if (data.length === 0) {
+          body.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-500">No inquiries found in table contact_inquiries.</td></tr>';
+          return;
+        }
+        data.forEach(row => {
+          body.innerHTML += `
+            <tr class="hover:bg-white/5 transition">
+              <td class="p-3 font-semibold text-slate-300">${row.name}<br><span class="text-[9px] text-slate-500">${row.email}</span></td>
+              <td class="p-3 text-slate-200"><span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px] font-semibold">${row.category}</span><br>${row.subject}</td>
+              <td class="p-3">${row.preferred_learning_mode || 'N/A'}<br><span class="text-slate-500 text-[10px]">${row.preferred_cohort || 'N/A'}</span></td>
+              <td class="p-3">${row.payment_readiness !== null ? (row.payment_readiness ? 'Ready' : 'Seeking Schol') : (row.preferred_response_channel || 'N/A')}</td>
+            </tr>
+          `;
+        });
+      } else if (currentLogsTab === 'rsvps') {
+        head.innerHTML = `
+          <tr class="bg-slate-900/60 text-slate-300 border-b border-white/5">
+            <th class="p-3">Attendee Name</th>
+            <th class="p-3">Phone</th>
+            <th class="p-3">Affiliation</th>
+            <th class="p-3">Diet / Access</th>
+          </tr>
+        `;
+        const data = dbLogsData.rsvps || [];
+        if (data.length === 0) {
+          body.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-500">No RSVPs found in table event_rsvps.</td></tr>';
+          return;
+        }
+        data.forEach(row => {
+          body.innerHTML += `
+            <tr class="hover:bg-white/5 transition">
+              <td class="p-3 font-semibold text-slate-300">${row.guest_name}<br><span class="text-[9px] text-slate-500">${row.guest_email}</span></td>
+              <td class="p-3 text-slate-200">${row.guest_phone || 'N/A'}</td>
+              <td class="p-3">${row.affiliation || 'N/A'}</td>
+              <td class="p-3 text-slate-400">Diet: ${row.dietary_requirements || 'None'}<br>Access: ${row.accessibility_requirements || 'None'}</td>
+            </tr>
+          `;
+        });
+      }
+    }
+
+    // Initialize fields
+    loadFormFields();
+  </script>
+</body>
+</html>

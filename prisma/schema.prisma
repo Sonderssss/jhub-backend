@@ -1,0 +1,557 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─────────────────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────────────────
+
+enum UserRole {
+  ADMIN
+  INNOVATOR
+  STUDENT
+  PARTNER
+  FUNDER
+  GUEST
+}
+
+enum InnovationStage {
+  IDEA
+  PROTOTYPE
+  PILOT
+  SCALING
+  MATURE
+}
+
+enum InnovationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  FEATURED
+}
+
+enum CourseDeliveryMode {
+  IN_PERSON
+  ONLINE
+  HYBRID
+}
+
+enum CohortStatus {
+  UPCOMING
+  OPEN
+  IN_PROGRESS
+  CLOSED
+  COMPLETED
+}
+
+enum EventType {
+  HACKATHON
+  WORKSHOP
+  SEMINAR
+  CONFERENCE
+  WEBINAR
+  NETWORKING
+  OTHER
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  COMPLETED
+}
+
+enum PartnerType {
+  INDUSTRY
+  ACADEMIC
+  GOVERNMENT
+  NGO
+  FUNDER
+  MEDIA
+}
+
+enum InquiryCategory {
+  GENERAL
+  INNOVATION_SUBMISSION
+  INCUBATION
+  PARTNERSHIP
+  FUNDING
+  COURSES
+  EVENTS
+  MEDIA
+  OTHER
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWING
+  ACCEPTED
+  REJECTED
+  WAITLISTED
+}
+
+// ─────────────────────────────────────────────────────────
+// USERS & AUTH
+// ─────────────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String?  @map("password_hash")
+  role         UserRole @default(GUEST)
+  isVerified   Boolean  @default(false) @map("is_verified")
+  isActive     Boolean  @default(true) @map("is_active")
+
+  // Profile
+  firstName   String?  @map("first_name")
+  lastName    String?  @map("last_name")
+  avatarUrl   String?  @map("avatar_url")
+  bio         String?
+  institution String?
+  phone       String?
+
+  // Auth tokens
+  refreshTokens RefreshToken[]
+
+  // Relations
+  innovations   Innovation[]
+  enrollments   Enrollment[]
+  applications  Application[]
+  eventRsvps    EventRsvp[]
+  submissions   InnovationSubmission[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("refresh_tokens")
+}
+
+// ─────────────────────────────────────────────────────────
+// INNOVATIONS
+// ─────────────────────────────────────────────────────────
+
+model Innovation {
+  id              String           @id @default(uuid())
+  slug            String           @unique
+  title           String
+  tagline         String?
+  problem         String           @db.Text
+  solution        String           @db.Text
+  stage           InnovationStage
+  status          InnovationStatus @default(DRAFT)
+  isFeatured      Boolean          @default(false) @map("is_featured")
+
+  // Categorisation
+  sector        String
+  categories    InnovationCategory[]
+  beneficiaries String?
+
+  // Traction & Impact
+  traction        String? @db.Text
+  impactEvidence  String? @db.Text @map("impact_evidence")
+  supportRequired String? @db.Text @map("support_required")
+
+  // Media
+  coverImageUrl String?  @map("cover_image_url")
+  mediaUrls     String[] @map("media_urls")
+
+  // Team
+  ownerId     String       @map("owner_id")
+  owner       User         @relation(fields: [ownerId], references: [id])
+  teamMembers TeamMember[]
+
+  // Sponsorship
+  sponsorships Sponsorship[]
+
+  // Submission
+  submissions InnovationSubmission[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("innovations")
+}
+
+model InnovationCategory {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  slug        String       @unique
+  description String?
+  innovations Innovation[]
+
+  @@map("innovation_categories")
+}
+
+model TeamMember {
+  id           String     @id @default(uuid())
+  innovationId String     @map("innovation_id")
+  innovation   Innovation @relation(fields: [innovationId], references: [id], onDelete: Cascade)
+  name         String
+  role         String
+  email        String?
+  linkedinUrl  String?    @map("linkedin_url")
+
+  @@map("team_members")
+}
+
+model InnovationSubmission {
+  id           String            @id @default(uuid())
+  innovationId String?           @map("innovation_id")
+  innovation   Innovation?       @relation(fields: [innovationId], references: [id])
+  userId       String?           @map("user_id")
+  user         User?             @relation(fields: [userId], references: [id])
+  status       ApplicationStatus @default(PENDING)
+
+  // Submission form fields (for new/guest submissions)
+  contactName  String  @map("contact_name")
+  contactEmail String  @map("contact_email")
+  phone        String?
+  institution  String?
+  notes        String? @db.Text
+
+  // Custom fields
+  title           String?
+  sector          String?
+  stage           InnovationStage?
+  problem         String?           @db.Text
+  solution        String?           @db.Text
+  supportRequired String?           @db.Text @map("support_required")
+  teamInfo        String?           @db.Text @map("team_info")
+  projectLinks    String?           @map("project_links")
+  attachmentUrl   String?           @map("attachment_url")
+
+  reviewedAt  DateTime? @map("reviewed_at")
+  reviewNotes String?   @map("review_notes")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("innovation_submissions")
+}
+
+// ─────────────────────────────────────────────────────────
+// COURSES & CERTIFICATIONS
+// ─────────────────────────────────────────────────────────
+
+model Course {
+  id            String             @id @default(uuid())
+  slug          String             @unique
+  title         String
+  description   String             @db.Text
+  category      String
+  deliveryMode  CourseDeliveryMode @map("delivery_mode")
+  durationWeeks Int?               @map("duration_weeks")
+  prerequisites String?
+  coverImageUrl String?            @map("cover_image_url")
+  isFeatured    Boolean            @default(false) @map("is_featured")
+  isPublished   Boolean            @default(false) @map("is_published")
+
+  cohorts     Cohort[]
+  lessons     Lesson[]
+  enrollments Enrollment[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("courses")
+}
+
+model Cohort {
+  id                 String       @id @default(uuid())
+  courseId           String       @map("course_id")
+  course             Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  name               String
+  status             CohortStatus @default(UPCOMING)
+  startDate          DateTime?    @map("start_date")
+  endDate            DateTime?    @map("end_date")
+  maxCapacity        Int?         @map("max_capacity")
+  enrollmentDeadline DateTime?    @map("enrollment_deadline")
+  zoomLink           String?      @map("zoom_link")
+  location           String?
+
+  enrollments Enrollment[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("cohorts")
+}
+
+model Lesson {
+  id          String  @id @default(uuid())
+  courseId    String  @map("course_id")
+  course      Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title       String
+  content     String? @db.Text
+  videoUrl    String? @map("video_url")
+  order       Int
+  isPublished Boolean @default(false) @map("is_published")
+
+  progress LessonProgress[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("lessons")
+}
+
+model Enrollment {
+  id          String            @id @default(uuid())
+  userId      String            @map("user_id")
+  user        User              @relation(fields: [userId], references: [id])
+  courseId    String            @map("course_id")
+  course      Course            @relation(fields: [courseId], references: [id])
+  cohortId    String?           @map("cohort_id")
+  cohort      Cohort?           @relation(fields: [cohortId], references: [id])
+  status      ApplicationStatus @default(PENDING)
+  completedAt DateTime?         @map("completed_at")
+
+  lessonProgress LessonProgress[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, courseId])
+  @@map("enrollments")
+}
+
+model LessonProgress {
+  id           String     @id @default(uuid())
+  enrollmentId String     @map("enrollment_id")
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  lessonId     String     @map("lesson_id")
+  lesson       Lesson     @relation(fields: [lessonId], references: [id])
+  completedAt  DateTime?  @map("completed_at")
+
+  @@unique([enrollmentId, lessonId])
+  @@map("lesson_progress")
+}
+
+// ─────────────────────────────────────────────────────────
+// EVENTS & PROGRAMS
+// ─────────────────────────────────────────────────────────
+
+model Event {
+  id          String      @id @default(uuid())
+  slug        String      @unique
+  title       String
+  description String      @db.Text
+  type        EventType
+  status      EventStatus @default(DRAFT)
+  isFeatured  Boolean     @default(false) @map("is_featured")
+
+  startDate   DateTime  @map("start_date")
+  endDate     DateTime? @map("end_date")
+  location    String?
+  isOnline    Boolean   @default(false) @map("is_online")
+  meetingUrl  String?   @map("meeting_url")
+  maxCapacity Int?      @map("max_capacity")
+
+  registrationUrl      String?   @map("registration_url")
+  registrationDeadline DateTime? @map("registration_deadline")
+  coverImageUrl        String?   @map("cover_image_url")
+
+  rsvps EventRsvp[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("events")
+}
+
+model EventRsvp {
+  id      String  @id @default(uuid())
+  eventId String  @map("event_id")
+  event   Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId  String? @map("user_id")
+  user    User?   @relation(fields: [userId], references: [id])
+
+  // Guest RSVP (no account required)
+  guestName  String? @map("guest_name")
+  guestEmail String? @map("guest_email")
+
+  // Custom fields
+  guestPhone                String?  @map("guest_phone")
+  affiliation               String?
+  dietaryRequirements       String?  @map("dietary_requirements")
+  accessibilityRequirements String?  @map("accessibility_requirements")
+  marketingConsent          Boolean? @default(false) @map("marketing_consent")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("event_rsvps")
+}
+
+// ─────────────────────────────────────────────────────────
+// NEWS & STORIES
+// ─────────────────────────────────────────────────────────
+
+model Post {
+  id            String    @id @default(uuid())
+  slug          String    @unique
+  title         String
+  excerpt       String?
+  content       String    @db.Text
+  category      String // 'news' | 'impact-story' | 'partner-story' | 'project-update' | 'announcement'
+  isPublished   Boolean   @default(false) @map("is_published")
+  isFeatured    Boolean   @default(false) @map("is_featured")
+  publishedAt   DateTime? @map("published_at")
+  coverImageUrl String?   @map("cover_image_url")
+  tags          String[]
+
+  authorId String?
+  // No FK — author may be external contributor
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("posts")
+}
+
+// ─────────────────────────────────────────────────────────
+// PARTNERS
+// ─────────────────────────────────────────────────────────
+
+model Partner {
+  id          String      @id @default(uuid())
+  name        String
+  slug        String      @unique
+  type        PartnerType
+  logoUrl     String?     @map("logo_url")
+  website     String?
+  description String?
+  isFeatured  Boolean     @default(false) @map("is_featured")
+  isActive    Boolean     @default(true) @map("is_active")
+
+  sponsorships Sponsorship[]
+  applications Application[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("partners")
+}
+
+model Sponsorship {
+  id           String    @id @default(uuid())
+  partnerId    String    @map("partner_id")
+  partner      Partner   @relation(fields: [partnerId], references: [id])
+  innovationId String    @map("innovation_id")
+  innovation   Innovation @relation(fields: [innovationId], references: [id])
+  amount       Float?
+  currency     String?   @default("KES")
+  description  String?
+  startDate    DateTime? @map("start_date")
+  endDate      DateTime? @map("end_date")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("sponsorships")
+}
+
+// ─────────────────────────────────────────────────────────
+// RESOURCES
+// ─────────────────────────────────────────────────────────
+
+model Resource {
+  id            String  @id @default(uuid())
+  slug          String  @unique
+  title         String
+  description   String?
+  category      String // 'toolkit' | 'template' | 'faq' | 'guide' | 'brief'
+  fileUrl       String? @map("file_url")
+  externalUrl   String? @map("external_url")
+  isPublished   Boolean @default(false) @map("is_published")
+  downloadCount Int     @default(0) @map("download_count")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("resources")
+}
+
+// ─────────────────────────────────────────────────────────
+// CONTACT & APPLICATIONS
+// ─────────────────────────────────────────────────────────
+
+model ContactInquiry {
+  id        String          @id @default(uuid())
+  name      String
+  email     String
+  phone     String?
+  category  InquiryCategory
+  subject   String
+  message   String          @db.Text
+  isRead    Boolean         @default(false) @map("is_read")
+  repliedAt DateTime?       @map("replied_at")
+
+  // Custom fields
+  preferredResponseChannel String?             @map("preferred_response_channel")
+  courseId                 String?             @map("course_id")
+  preferredCohort          String?             @map("preferred_cohort")
+  preferredLearningMode    CourseDeliveryMode? @map("preferred_learning_mode")
+  eligibilityDetails       String?             @db.Text @map("eligibility_details")
+  paymentReadiness         Boolean?            @map("payment_readiness")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("contact_inquiries")
+}
+
+model Application {
+  id             String            @id @default(uuid())
+  type           String // 'incubation' | 'partnership' | 'collaboration'
+  userId         String?           @map("user_id")
+  user           User?             @relation(fields: [userId], references: [id])
+  partnerId      String?           @map("partner_id")
+  partner        Partner?          @relation(fields: [partnerId], references: [id])
+  status         ApplicationStatus @default(PENDING)
+
+  // Form fields
+  applicantName  String            @map("applicant_name")
+  applicantEmail String            @map("applicant_email")
+  organization   String?
+  message        String?           @db.Text
+  attachmentUrl  String?           @map("attachment_url")
+
+  // Custom partner fields
+  partnershipType       String? @map("partnership_type")
+  sector                String?
+  proposedCollaboration String? @db.Text @map("proposed_collaboration")
+  expectedTimeline      String? @map("expected_timeline")
+  contactPhone          String? @map("contact_phone")
+
+  // Custom sponsor fields
+  interestArea           String? @map("interest_area")
+  sponsorshipType        String? @map("sponsorship_type")
+  budgetRange            String? @map("budget_range")
+  expectedOutcome        String? @db.Text @map("expected_outcome")
+  preferredContactMethod String? @map("preferred_contact_method")
+
+  reviewedAt  DateTime? @map("reviewed_at")
+  reviewNotes String?   @map("review_notes")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("applications")
+}
