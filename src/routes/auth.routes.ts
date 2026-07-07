@@ -21,7 +21,7 @@ router.post(
       const { data: authUser, error } = await supabaseAdmin.auth.admin.createUser({
         email,
         password,
-        email_confirm: false,
+        email_confirm: true,
         user_metadata: { firstName, lastName, role },
       })
 
@@ -31,6 +31,18 @@ router.post(
         }
         throw error
       }
+
+      // Sync user profile into public users table
+      const { error: dbError } = await supabaseAdmin.from('users').insert({
+        id:          authUser.user.id,
+        email,
+        first_name:  firstName,
+        last_name:   lastName,
+        role:        role.toUpperCase(),
+        is_verified: true,
+        is_active:   true,
+      })
+      if (dbError) throw dbError
 
       const token = signToken({
         sub: authUser.user.id,

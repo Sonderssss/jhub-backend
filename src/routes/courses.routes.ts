@@ -261,6 +261,7 @@ ${eligibilityDetails}
 
       // Store in contact_inquiries with COURSES category
       const { error } = await supabaseAdmin.from('contact_inquiries').insert({
+        id:                      crypto.randomUUID(),
         name,
         email,
         phone,

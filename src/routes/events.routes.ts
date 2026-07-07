@@ -156,6 +156,7 @@ router.post(
       const { data, error } = await supabaseAdmin
         .from('event_rsvps')
         .insert({
+          id:                         crypto.randomUUID(),
           event_id:                   id,
           user_id:                    userId,
           guest_name:                 guestName,

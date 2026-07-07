@@ -64,6 +64,7 @@ ${proposedCollaboration}
       `.trim()
 
       const { error } = await supabaseAdmin.from('applications').insert({
+        id:                     crypto.randomUUID(),
         type:                   'partnership',
         applicant_name:         contactName,
         applicant_email:        contactEmail,
@@ -125,6 +126,7 @@ Message: ${message || 'None'}
       `.trim()
 
       const { error } = await supabaseAdmin.from('applications').insert({
+        id:                       crypto.randomUUID(),
         type:                     'sponsorship',
         applicant_name:           sponsorName,
         applicant_email:          sponsorEmail,

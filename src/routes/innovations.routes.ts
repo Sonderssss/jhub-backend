@@ -21,16 +21,16 @@ router.get('/', validate(listQuerySchema, 'query'), async (req, res, next) => {
         id, slug, title, tagline, stage, status, sector,
         is_featured, cover_image_url, created_at,
         owner:users(id, first_name, last_name),
-        innovation_categories(name, slug)
+        InnovationToInnovationCategory(innovation_categories(name, slug))
       `, { count: 'exact' })
       .eq('status', 'APPROVED')
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1)
 
-    if (stage)    query = query.eq('stage', stage)
-    if (sector)   query = query.eq('sector', sector)
+    if (stage) query = query.eq('stage', stage)
+    if (sector) query = query.eq('sector', sector)
     if (featured) query = query.eq('is_featured', true)
-    if (search)   query = query.ilike('title', `%${search}%`)
+    if (search) query = query.ilike('title', `%${search}%`)
 
     const { data, error, count } = await query
     if (error) throw error
@@ -91,7 +91,7 @@ router.get('/:slug', async (req, res, next) => {
           *,
           owner:users(id, first_name, last_name, avatar_url),
           team_members(*),
-          innovation_categories(name, slug),
+          InnovationToInnovationCategory(innovation_categories(name, slug)),
           sponsorships(
             id, amount, currency,
             partner:partners(name, logo_url, website)
@@ -123,10 +123,17 @@ router.post(
       const { title, tagline, problem, solution, stage, sector, categories, beneficiaries, traction, impactEvidence, supportRequired, ownerId, coverImageUrl } = req.body
 
       const owner_id = req.user?.sub || ownerId || null
+      if (!owner_id) {
+        return res.status(400).json({
+          error: 'Validation Error',
+          message: 'An ownerId is required in the request body, or a valid Authorization Bearer token must be provided.'
+        })
+      }
 
       const { data, error } = await supabaseAdmin
         .from('innovations')
         .insert({
+          id: crypto.randomUUID(),
           slug,
           title,
           tagline,
@@ -177,23 +184,24 @@ Attachment: ${attachmentUrl || 'None'}
       const { data, error } = await supabaseAdmin
         .from('innovation_submissions')
         .insert({
-          contact_name:     contactName,
-          contact_email:    contactEmail,
+          id: crypto.randomUUID(),
+          contact_name: contactName,
+          contact_email: contactEmail,
           phone,
-          institution:      teamInfo, // fallback to team info as institution context
-          notes:            structuredNotes,
-          innovation_id:    innovationId ?? null,
-          user_id:          req.user?.sub ?? null,
-          status:           'PENDING',
+          institution: teamInfo, // fallback to team info as institution context
+          notes: structuredNotes,
+          innovation_id: innovationId ?? null,
+          user_id: req.user?.sub ?? null,
+          status: 'PENDING',
           title,
           sector,
           stage,
           problem,
           solution,
           support_required: supportRequired,
-          team_info:        teamInfo,
-          project_links:    projectLinks ?? null,
-          attachment_url:   attachmentUrl ?? null,
+          team_info: teamInfo,
+          project_links: projectLinks ?? null,
+          attachment_url: attachmentUrl ?? null,
         })
         .select()
         .single()
@@ -242,11 +250,18 @@ router.patch(
   async (req, res, next) => {
     try {
       const { id } = req.params
-      const allowed = ['title','tagline','problem','solution','stage','sector',
-                       'beneficiaries','traction','impactEvidence','supportRequired','coverImageUrl']
-      const updates = Object.fromEntries(
-        Object.entries(req.body).filter(([k]) => allowed.includes(k))
-      )
+      const updates: any = {}
+      if (req.body.title !== undefined) updates.title = req.body.title
+      if (req.body.tagline !== undefined) updates.tagline = req.body.tagline
+      if (req.body.problem !== undefined) updates.problem = req.body.problem
+      if (req.body.solution !== undefined) updates.solution = req.body.solution
+      if (req.body.stage !== undefined) updates.stage = req.body.stage
+      if (req.body.sector !== undefined) updates.sector = req.body.sector
+      if (req.body.beneficiaries !== undefined) updates.beneficiaries = req.body.beneficiaries
+      if (req.body.traction !== undefined) updates.traction = req.body.traction
+      if (req.body.impactEvidence !== undefined) updates.impact_evidence = req.body.impactEvidence
+      if (req.body.supportRequired !== undefined) updates.support_required = req.body.supportRequired
+      if (req.body.coverImageUrl !== undefined) updates.cover_image_url = req.body.coverImageUrl
 
       const { data, error } = await supabaseAdmin
         .from('innovations')

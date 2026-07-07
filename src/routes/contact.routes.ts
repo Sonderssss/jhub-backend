@@ -25,6 +25,7 @@ ${message}
       const { data, error } = await supabaseAdmin
         .from('contact_inquiries')
         .insert({
+          id:                         crypto.randomUUID(),
           name,
           email,
           phone,

@@ -10,13 +10,13 @@ import contactRouter from './contact.routes.js'
 
 const router = Router()
 
-router.use('/auth',        authRoutes)
+router.use('/auth', authRoutes)
 router.use('/innovations', innovationsRoutes)
-router.use('/courses',     coursesRoutes)
-router.use('/events',      eventsRoutes)
-router.use('/news',        newsRouter)
-router.use('/partners',    partnersRouter)
-router.use('/resources',   resourcesRouter)
-router.use('/contact',     contactRouter)
+router.use('/courses', coursesRoutes)
+router.use('/events', eventsRoutes)
+router.use('/news', newsRouter)
+router.use('/partners', partnersRouter)
+router.use('/resources', resourcesRouter)
+router.use('/contact', contactRouter)
 
 export default router
