@@ -259,47 +259,5 @@ router.post(
   }
 )
 
-// ── POST /events ───────────────────────────────────────
-router.post(
-  '/',
-  validate(createEventSchema),
-  async (req, res, next) => {
-    try {
-      const slugify = (await import('slugify')).default
-      const slug = slugify(req.body.title, { lower: true, strict: true })
-
-      const { title, description, type, status, isFeatured, startDate, endDate, location, isOnline, meetingUrl, maxCapacity, registrationUrl, registrationDeadline, coverImageUrl } = req.body
-
-      const { data, error } = await supabaseAdmin
-        .from('events')
-        .insert({
-          id: crypto.randomUUID(),
-          slug,
-          title,
-          description,
-          type,
-          status,
-          is_featured: isFeatured,
-          start_date: startDate,
-          end_date: endDate,
-          location,
-          is_online: isOnline,
-          meeting_url: meetingUrl,
-          max_capacity: maxCapacity,
-          registration_url: registrationUrl,
-          registration_deadline: registrationDeadline,
-          cover_image_url: coverImageUrl,
-        })
-        .select()
-        .single()
-
-      if (error) throw error
-      res.status(201).json({ data })
-    } catch (err) {
-      next(err)
-    }
-  }
-)
-
 
 export default router
