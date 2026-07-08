@@ -312,41 +312,5 @@ ${eligibilityDetails}
   }
 )
 
-// ── POST /courses ──────────────────────────────────────
-router.post(
-  '/',
-  validate(createCourseSchema),
-  async (req, res, next) => {
-    try {
-      const slugify = (await import('slugify')).default
-      const slug = slugify(req.body.title, { lower: true, strict: true })
-
-      const { title, description, category, deliveryMode, durationWeeks, prerequisites, coverImageUrl, isFeatured, isPublished } = req.body
-
-      const { data, error } = await supabaseAdmin
-        .from('courses')
-        .insert({
-          slug,
-          title,
-          description,
-          category,
-          delivery_mode: deliveryMode,
-          duration_weeks: durationWeeks,
-          prerequisites,
-          cover_image_url: coverImageUrl,
-          is_featured: isFeatured,
-          is_published: isPublished,
-        })
-        .select()
-        .single()
-
-      if (error) throw error
-      res.status(201).json({ data })
-    } catch (err) {
-      next(err)
-    }
-  }
-)
-
 
 export default router

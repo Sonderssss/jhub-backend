@@ -2,9 +2,46 @@ import { Router } from 'express'
 import { validate } from '../../middleware/validate.middleware.js'
 import { supabaseAdmin } from '../../config/supabase.js'
 import { NotFoundError } from '../../middleware/error.middleware.js'
-import { updateCourseSchema, createCohortSchema, createLessonSchema } from '../../schemas/courses.schema.js'
+import { updateCourseSchema, createCourseSchema, createCohortSchema, createLessonSchema } from '../../schemas/courses.schema.js'
 
 const router = Router()
+
+// ── POST / ─────────────────────────────────────────────
+router.post(
+  '/',
+  validate(createCourseSchema),
+  async (req, res, next) => {
+    try {
+      const slugify = (await import('slugify')).default
+      const slug = slugify(req.body.title, { lower: true, strict: true })
+
+      const { title, description, category, deliveryMode, durationWeeks, prerequisites, coverImageUrl, isFeatured, isPublished } = req.body
+
+      const { data, error } = await supabaseAdmin
+        .from('courses')
+        .insert({
+          id: crypto.randomUUID(),
+          slug,
+          title,
+          description,
+          category,
+          delivery_mode: deliveryMode,
+          duration_weeks: durationWeeks,
+          prerequisites,
+          cover_image_url: coverImageUrl,
+          is_featured: isFeatured,
+          is_published: isPublished,
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      res.status(201).json({ data })
+    } catch (err) {
+      next(err)
+    }
+  }
+)
 
 // ── PATCH /:id ─────────────────────────────────────────
 router.patch(
