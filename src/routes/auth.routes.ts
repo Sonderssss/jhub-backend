@@ -112,6 +112,52 @@ router.post(
   }
 )
 
+// ── POST /auth/admin/login ────────────────────────────
+router.post(
+  '/admin/login',
+  authLimiter,
+  validate(loginSchema),
+  async (req, res, next) => {
+    try {
+      const { email, password } = req.body
+
+      const { data, error } = await supabaseAdmin.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (error || !data.user) {
+        return res.status(401).json({ error: 'Invalid email or password' })
+      }
+
+      const role = data.user.user_metadata?.role ?? 'guest'
+      if (role.toLowerCase() !== 'admin') {
+        return res.status(403).json({ error: 'Access denied: Administrator privileges required' })
+      }
+
+      const token = signToken({
+        sub: data.user.id,
+        email: data.user.email!,
+        role: 'admin',
+      })
+      const refreshToken = signRefreshToken(data.user.id)
+
+      res.json({
+        token,
+        refreshToken,
+        user: {
+          id: data.user.id,
+          email: data.user.email,
+          role: 'admin',
+          ...data.user.user_metadata,
+        },
+      })
+    } catch (err) {
+      next(err)
+    }
+  }
+)
+
 // ── POST /auth/refresh ─────────────────────────────────
 router.post(
   '/refresh',
