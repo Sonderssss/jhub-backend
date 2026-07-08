@@ -7,6 +7,8 @@ import newsRouter from './news.routes.js'
 import partnersRouter from './partners.routes.js'
 import resourcesRouter from './resources.routes.js'
 import contactRouter from './contact.routes.js'
+import adminRouter from './admin/index.js'
+import { requireAuth, requireRole } from '../middleware/auth.middleware.js'
 
 const router = Router()
 
@@ -18,5 +20,8 @@ router.use('/news', newsRouter)
 router.use('/partners', partnersRouter)
 router.use('/resources', resourcesRouter)
 router.use('/contact', contactRouter)
+
+// Unified admin endpoints with RBAC protection
+router.use('/admin', requireAuth, requireRole('admin'), adminRouter)
 
 export default router
