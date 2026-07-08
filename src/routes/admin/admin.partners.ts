@@ -74,6 +74,7 @@ router.post(
       const { data, error } = await supabaseAdmin
         .from('sponsorships')
         .insert({
+          id: crypto.randomUUID(),
           partner_id: partnerId,
           innovation_id: innovationId,
           amount,

@@ -114,6 +114,7 @@ router.post(
       const { data, error } = await supabaseAdmin
         .from('cohorts')
         .insert({
+          id: crypto.randomUUID(),
           course_id: courseId,
           name,
           status,
@@ -147,6 +148,7 @@ router.post(
       const { data, error } = await supabaseAdmin
         .from('lessons')
         .insert({
+          id: crypto.randomUUID(),
           course_id: courseId,
           title,
           content,

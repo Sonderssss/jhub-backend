@@ -193,6 +193,7 @@ partnersRouter.post(
       const { data, error } = await supabaseAdmin
         .from('partners')
         .insert({
+          id: crypto.randomUUID(),
           slug,
           name,
           type,

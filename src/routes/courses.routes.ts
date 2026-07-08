@@ -128,6 +128,7 @@ router.post(
       const { data, error } = await supabaseAdmin
         .from('enrollments')
         .insert({
+          id:        crypto.randomUUID(),
           user_id:   userId,
           course_id: id,
           cohort_id: req.body.cohortId ?? null,

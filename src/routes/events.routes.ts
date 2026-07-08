@@ -273,6 +273,7 @@ router.post(
       const { data, error } = await supabaseAdmin
         .from('events')
         .insert({
+          id: crypto.randomUUID(),
           slug,
           title,
           description,
