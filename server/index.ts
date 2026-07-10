@@ -19,12 +19,6 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
 }))
 
-import path from 'path'
-import { fileURLToPath } from 'url'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
 app.use(cors({
   origin: CORS_ORIGINS ? CORS_ORIGINS.split(',') : '*',
   credentials: true,
@@ -35,9 +29,6 @@ app.use(cors({
 app.use(compression())
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
-
-// Serve interactive playground static UI
-app.use('/playground', express.static(path.join(__dirname, '../playground')))
 
 // if (isDev) {
 //   app.use(morgan('dev'))
@@ -80,19 +71,6 @@ app.get('/test-supabase', async (req, res) => {
   }
 
   res.json(data)
-})
-
-app.get('/playground-data', async (req, res) => {
-  try {
-    const { data: submissions } = await supabaseAdmin.from('innovation_submissions').select('*').order('created_at', { ascending: false }).limit(25)
-    const { data: applications } = await supabaseAdmin.from('applications').select('*').order('created_at', { ascending: false }).limit(25)
-    const { data: inquiries } = await supabaseAdmin.from('contact_inquiries').select('*').order('created_at', { ascending: false }).limit(25)
-    const { data: rsvps } = await supabaseAdmin.from('event_rsvps').select('*').order('created_at', { ascending: false }).limit(25)
-
-    res.json({ submissions, applications, inquiries, rsvps })
-  } catch (err: any) {
-    res.status(500).json({ error: err.message })
-  }
 })
 
 // ── 404 & error handlers (must be last) ───────────────
