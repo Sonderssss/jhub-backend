@@ -44,3 +44,8 @@ export const createSponsorshipSchema = z.object({
   startDate:    z.string().datetime().optional(),
   endDate:      z.string().datetime().optional(),
 })
+
+export const updateApplicationSchema = z.object({
+  status:      z.enum(['PENDING', 'APPROVED', 'REJECTED']),
+  reviewNotes: z.string().optional().or(z.literal('')),
+})

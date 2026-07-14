@@ -179,45 +179,5 @@ Message: ${message || 'None'}
   }
 )
 
-// ── POST /partners ──────────────────────────────────────
-partnersRouter.post(
-  '/',
-  validate(createPartnerProfileSchema),
-  async (req, res, next) => {
-    try {
-      const slugify = (await import('slugify')).default
-      const slug = slugify(req.body.name, { lower: true, strict: true })
-
-      const { name, type, logoUrl, website, description, isFeatured, isActive } = req.body
-
-      const { data, error } = await supabaseAdmin
-        .from('partners')
-        .insert({
-          id: crypto.randomUUID(),
-          slug,
-          name,
-          type,
-          logo_url: logoUrl,
-          website,
-          description,
-          is_featured: isFeatured,
-          is_active: isActive,
-        })
-        .select()
-        .single()
-
-      if (error) throw error
-
-      if (redis) {
-        await redis.del(CacheKey.partners())
-      }
-
-      res.status(201).json({ data })
-    } catch (err) {
-      next(err)
-    }
-  }
-)
-
 
 export default partnersRouter
