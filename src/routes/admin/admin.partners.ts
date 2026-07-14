@@ -3,6 +3,7 @@ import { validate } from '../../middleware/validate.middleware.js'
 import { supabaseAdmin } from '../../config/supabase.js'
 import { NotFoundError } from '../../middleware/error.middleware.js'
 import { updatePartnerSchema, createSponsorshipSchema } from '../../schemas/partners.schema.js'
+import { redis, CacheKey } from '../../config/redis.js'
 
 const router = Router()
 
@@ -36,6 +37,11 @@ router.patch(
         .single()
 
       if (error || !data) throw new NotFoundError('Partner')
+
+      if (redis) {
+        await redis.del(CacheKey.partners())
+      }
+
       res.json({ data })
     } catch (err) {
       next(err)
@@ -55,6 +61,11 @@ router.delete(
         .eq('id', id)
 
       if (error) throw error
+
+      if (redis) {
+        await redis.del(CacheKey.partners())
+      }
+
       res.status(204).end()
     } catch (err) {
       next(err)

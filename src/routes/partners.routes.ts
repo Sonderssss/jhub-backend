@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { validate } from '../middleware/validate.middleware.js'
 import { formLimiter } from '../middleware/rateLimiter.middleware.js'
 import { supabase, supabaseAdmin } from '../config/supabase.js'
-import { withCache, CacheKey, CacheTTL } from '../config/redis.js'
+import { withCache, CacheKey, CacheTTL, redis } from '../config/redis.js'
 import { NotFoundError } from '../middleware/error.middleware.js'
 import { requireAuth, requireRole } from '../middleware/auth.middleware.js'
 import { partnerApplicationSchema, partnerSponsorSchema, createPartnerProfileSchema, updatePartnerSchema, createSponsorshipSchema } from '../schemas/partners.schema.js'
@@ -207,6 +207,11 @@ partnersRouter.post(
         .single()
 
       if (error) throw error
+
+      if (redis) {
+        await redis.del(CacheKey.partners())
+      }
+
       res.status(201).json({ data })
     } catch (err) {
       next(err)
