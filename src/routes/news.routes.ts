@@ -15,7 +15,7 @@ newsRouter.get('/', validate(newsQuerySchema, 'query'), async (req, res, next) =
 
     let query = supabase
       .from('posts')
-      .select('id, slug, title, excerpt, category, published_at, is_featured, cover_image_url, tags, author_id', { count: 'exact' })
+      .select('id, slug, title, excerpt, category, published_at, is_featured, cover_image_url, tags, authorId', { count: 'exact' })
       .eq('is_published', true)
       .order('published_at', { ascending: false })
       .range(offset, offset + limit - 1)

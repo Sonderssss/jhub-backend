@@ -4,6 +4,7 @@ import adminCoursesRouter from './admin.courses.js'
 import adminEventsRouter from './admin.events.js'
 import adminPartnersRouter from './admin.partners.js'
 import adminUsersRouter from './admin.users.js'
+import adminNewsRouter from './admin.news.js'
 
 export const adminRouter = Router()
 
@@ -13,5 +14,6 @@ adminRouter.use('/courses', adminCoursesRouter)
 adminRouter.use('/events', adminEventsRouter)
 adminRouter.use('/partners', adminPartnersRouter)
 adminRouter.use('/users', adminUsersRouter)
+adminRouter.use('/news', adminNewsRouter)
 
 export default adminRouter
