@@ -58,5 +58,4 @@ tmp/
 .gemini/
 
 # Markdown files
-*.md
 *.mmd
