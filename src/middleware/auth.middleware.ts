@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import { JWT_SECRET, JWT_EXPIRES_IN, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EXPIRES_IN } from '../config/env.js'
 import { supabaseAdmin } from '../config/supabase.js'
+import { redis } from '../config/redis.js'
 
 export interface JWTPayload {
   sub: string        // user id
@@ -18,20 +19,58 @@ declare global {
   namespace Express {
     interface Request {
       user?: JWTPayload
+      token?: string
     }
   }
 }
 
+// ── Token Blacklist Store ──────────────────────────────
+interface BlacklistedToken {
+  token: string
+  expiresAt: number
+}
+let memoryBlacklist: BlacklistedToken[] = []
+
+export async function isTokenBlacklisted(token: string): Promise<boolean> {
+  const now = Math.floor(Date.now() / 1000)
+  // Clean up memory blacklist
+  memoryBlacklist = memoryBlacklist.filter(t => t.expiresAt > now)
+
+  if (redis) {
+    const exists = await redis.exists(`blacklist:${token}`)
+    return exists === 1
+  }
+
+  return memoryBlacklist.some(t => t.token === token)
+}
+
+export async function blacklistToken(token: string, exp: number): Promise<void> {
+  const now = Math.floor(Date.now() / 1000)
+  const ttl = exp - now
+  if (ttl <= 0) return
+
+  if (redis) {
+    await redis.setex(`blacklist:${token}`, ttl, 'revoked')
+  } else {
+    memoryBlacklist.push({ token, expiresAt: exp })
+  }
+}
+
 // ── Require valid JWT ──────────────────────────────────
-export function requireAuth(req: Request, res: Response, next: NextFunction) {
+export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   const token = extractToken(req)
   if (!token) {
     return res.status(401).json({ error: 'Authentication required' })
   }
 
   try {
+    if (await isTokenBlacklisted(token)) {
+      return res.status(401).json({ error: 'Token has been revoked' })
+    }
+
     const payload = jwt.verify(token, JWT_SECRET as string) as JWTPayload
     req.user = payload
+    req.token = token
     next()
   } catch {
     return res.status(401).json({ error: 'Invalid or expired token' })
@@ -39,11 +78,14 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
 }
 
 // ── Attach user if token present, but don't block ─────
-export function optionalAuth(req: Request, res: Response, next: NextFunction) {
+export async function optionalAuth(req: Request, res: Response, next: NextFunction) {
   const token = extractToken(req)
   if (token) {
     try {
-      req.user = jwt.verify(token, JWT_SECRET as string) as JWTPayload
+      if (!(await isTokenBlacklisted(token))) {
+        req.user = jwt.verify(token, JWT_SECRET as string) as JWTPayload
+        req.token = token
+      }
     } catch {
       // Token invalid — proceed as guest
     }

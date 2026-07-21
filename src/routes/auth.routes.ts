@@ -2,7 +2,7 @@ import { Router } from 'express'
 import bcrypt from 'bcryptjs'
 import { validate } from '../middleware/validate.middleware.js'
 import { authLimiter } from '../middleware/rateLimiter.middleware.js'
-import { requireAuth, signToken, signRefreshToken } from '../middleware/auth.middleware.js'
+import { requireAuth, signToken, signRefreshToken, blacklistToken } from '../middleware/auth.middleware.js'
 import { supabaseAdmin } from '../config/supabase.js'
 import { registerSchema, loginSchema, refreshSchema } from '../schemas/auth.schema.js'
 
@@ -34,13 +34,13 @@ router.post(
 
       // Sync user profile into public users table
       const { error: dbError } = await supabaseAdmin.from('users').insert({
-        id:          authUser.user.id,
+        id: authUser.user.id,
         email,
-        first_name:  firstName,
-        last_name:   lastName,
-        role:        role.toUpperCase(),
+        first_name: firstName,
+        last_name: lastName,
+        role: role.toUpperCase(),
         is_verified: true,
-        is_active:   true,
+        is_active: true,
       })
       if (dbError) throw dbError
 
@@ -190,8 +190,14 @@ router.post(
 )
 
 // ── POST /auth/logout ──────────────────────────────────
-router.post('/logout', requireAuth, async (req, res, next) => {
+router.post('/admin/logout', requireAuth, async (req, res, next) => {
   try {
+    const token = req.token
+    const exp = req.user?.exp
+    if (token && exp) {
+      await blacklistToken(token, exp)
+    }
+
     await supabaseAdmin.auth.admin.signOut(req.user!.sub)
     res.json({ message: 'Logged out successfully' })
   } catch (err) {
