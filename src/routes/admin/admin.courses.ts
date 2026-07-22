@@ -1,170 +1,23 @@
 import { Router } from 'express'
 import { validate } from '../../middleware/validate.middleware.js'
-import { supabaseAdmin } from '../../config/supabase.js'
-import { NotFoundError } from '../../middleware/error.middleware.js'
 import { updateCourseSchema, createCourseSchema, createCohortSchema, createLessonSchema } from '../../schemas/courses.schema.js'
+import { createCourse, updateCourse, deleteCourse, createCohort, createLesson } from '../../controllers/admin/courses.controller.js'
 
 const router = Router()
 
 // ── POST / ─────────────────────────────────────────────
-router.post(
-  '/',
-  validate(createCourseSchema),
-  async (req, res, next) => {
-    try {
-      const slugify = (await import('slugify')).default
-      const slug = slugify(req.body.title, { lower: true, strict: true })
-
-      const { title, description, category, deliveryMode, durationWeeks, prerequisites, coverImageUrl, isFeatured, isPublished } = req.body
-
-      const { data, error } = await supabaseAdmin
-        .from('courses')
-        .insert({
-          id: crypto.randomUUID(),
-          slug,
-          title,
-          description,
-          category,
-          delivery_mode: deliveryMode,
-          duration_weeks: durationWeeks,
-          prerequisites,
-          cover_image_url: coverImageUrl,
-          is_featured: isFeatured,
-          is_published: isPublished,
-        })
-        .select()
-        .single()
-
-      if (error) throw error
-      res.status(201).json({ data })
-    } catch (err) {
-      next(err)
-    }
-  }
-)
+router.post('/', validate(createCourseSchema), createCourse)
 
 // ── PATCH /:id ─────────────────────────────────────────
-router.patch(
-  '/:id',
-  validate(updateCourseSchema),
-  async (req, res, next) => {
-    try {
-      const { id } = req.params
-      const { title, description, category, deliveryMode, durationWeeks, prerequisites, coverImageUrl, isFeatured, isPublished } = req.body
-
-      // Prepare updates mapping to db columns
-      const updates: any = {}
-      if (title !== undefined) {
-        updates.title = title
-        const slugify = (await import('slugify')).default
-        updates.slug = slugify(title, { lower: true, strict: true })
-      }
-      if (description !== undefined) updates.description = description
-      if (category !== undefined) updates.category = category
-      if (deliveryMode !== undefined) updates.delivery_mode = deliveryMode
-      if (durationWeeks !== undefined) updates.duration_weeks = durationWeeks
-      if (prerequisites !== undefined) updates.prerequisites = prerequisites
-      if (coverImageUrl !== undefined) updates.cover_image_url = coverImageUrl
-      if (isFeatured !== undefined) updates.is_featured = isFeatured
-      if (isPublished !== undefined) updates.is_published = isPublished
-
-      const { data, error } = await supabaseAdmin
-        .from('courses')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single()
-
-      if (error || !data) throw new NotFoundError('Course')
-      res.json({ data })
-    } catch (err) {
-      next(err)
-    }
-  }
-)
+router.patch('/:id', validate(updateCourseSchema), updateCourse)
 
 // ── DELETE /:id ────────────────────────────────────────
-router.delete(
-  '/:id',
-  async (req, res, next) => {
-    try {
-      const { id } = req.params
-      const { error } = await supabaseAdmin
-        .from('courses')
-        .delete()
-        .eq('id', id)
-
-      if (error) throw error
-      res.status(204).end()
-    } catch (err) {
-      next(err)
-    }
-  }
-)
+router.delete('/:id', deleteCourse)
 
 // ── POST /:id/cohorts ──────────────────────────────────
-router.post(
-  '/:id/cohorts',
-  validate(createCohortSchema),
-  async (req, res, next) => {
-    try {
-      const { id: courseId } = req.params
-      const { name, status, startDate, endDate, maxCapacity, enrollmentDeadline, zoomLink, location } = req.body
-
-      const { data, error } = await supabaseAdmin
-        .from('cohorts')
-        .insert({
-          id: crypto.randomUUID(),
-          course_id: courseId,
-          name,
-          status,
-          start_date: startDate,
-          end_date: endDate,
-          max_capacity: maxCapacity,
-          enrollment_deadline: enrollmentDeadline,
-          zoom_link: zoomLink,
-          location,
-        })
-        .select()
-        .single()
-
-      if (error) throw error
-      res.status(201).json({ data })
-    } catch (err) {
-      next(err)
-    }
-  }
-)
+router.post('/:id/cohorts', validate(createCohortSchema), createCohort)
 
 // ── POST /:id/lessons ──────────────────────────────────
-router.post(
-  '/:id/lessons',
-  validate(createLessonSchema),
-  async (req, res, next) => {
-    try {
-      const { id: courseId } = req.params
-      const { title, content, videoUrl, order, isPublished } = req.body
-
-      const { data, error } = await supabaseAdmin
-        .from('lessons')
-        .insert({
-          id: crypto.randomUUID(),
-          course_id: courseId,
-          title,
-          content,
-          video_url: videoUrl,
-          order,
-          is_published: isPublished,
-        })
-        .select()
-        .single()
-
-      if (error) throw error
-      res.status(201).json({ data })
-    } catch (err) {
-      next(err)
-    }
-  }
-)
+router.post('/:id/lessons', validate(createLessonSchema), createLesson)
 
 export default router
