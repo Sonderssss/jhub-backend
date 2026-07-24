@@ -13,6 +13,7 @@ export async function getInnovations(req: Request, res: Response, next: NextFunc
       .select(`
         id, slug, title, tagline, stage, status, sector,
         is_featured, cover_image_url, created_at,
+        problem, solution, support_required,
         owner:users(id, first_name, last_name),
         InnovationToInnovationCategory(innovation_categories(name, slug))
       `, { count: 'exact' })
