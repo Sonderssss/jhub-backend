@@ -39,3 +39,16 @@ export async function toggleFeatured(req: Request, res: Response, next: NextFunc
     next(err)
   }
 }
+export async function getAdminInnovations(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('innovations')
+      .select('id, slug, title, tagline, stage, status, sector, is_featured, cover_image_url, created_at, problem, solution, support_required')
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    res.json({ data })
+  } catch (err) {
+    next(err)
+  }
+}
