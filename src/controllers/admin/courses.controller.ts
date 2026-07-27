@@ -138,3 +138,17 @@ export async function createLesson(req: Request, res: Response, next: NextFuncti
     next(err)
   }
 }
+
+export async function getAdminCourses(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('courses')
+      .select('id, slug, title, description, category, delivery_mode, duration_weeks, is_featured, is_published, cover_image_url')
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    res.json({ data })
+  } catch (err) {
+    next(err)
+  }
+}
