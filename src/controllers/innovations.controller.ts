@@ -140,6 +140,24 @@ export async function createDraft(req: Request, res: Response, next: NextFunctio
       .single()
 
     if (error) throw error
+
+    // Sync nested team members
+    const teamMembers = req.body.teamMembers
+    if (teamMembers && Array.isArray(teamMembers) && teamMembers.length > 0) {
+      const teamInsertPayload = teamMembers.map((m: any) => ({
+        id: crypto.randomUUID(),
+        innovation_id: data.id,
+        name: m.name,
+        role: m.role,
+      }))
+      const { error: teamError } = await supabaseAdmin
+        .from('team_members')
+        .insert(teamInsertPayload)
+      if (teamError) {
+        console.error("Failed to insert nested team members on createDraft:", teamError)
+      }
+    }
+
     res.status(201).json({ data })
   } catch (err) {
     next(err)
@@ -239,15 +257,48 @@ export async function updateInnovation(req: Request, res: Response, next: NextFu
     if (req.body.supportRequired !== undefined) updates.support_required = req.body.supportRequired
     if (req.body.coverImageUrl !== undefined) updates.cover_image_url = req.body.coverImageUrl
 
-    const { data, error } = await supabaseAdmin
+    let query = supabaseAdmin
       .from('innovations')
       .update(updates)
       .eq('id', id)
-      .eq('owner_id', req.user!.sub) // RLS: only owner can update
-      .select()
-      .single()
+
+    if (req.user!.role !== 'admin') {
+      query = query.eq('owner_id', req.user!.sub)
+    }
+
+    const { data, error } = await query.select().single()
 
     if (error || !data) throw new NotFoundError('Innovation')
+
+    // Sync nested team members
+    const teamMembers = req.body.teamMembers
+    if (teamMembers && Array.isArray(teamMembers)) {
+      // First, delete old ones
+      const { error: deleteError } = await supabaseAdmin
+        .from('team_members')
+        .delete()
+        .eq('innovation_id', id)
+      if (deleteError) {
+        console.error("Failed to delete team members on updateInnovation:", deleteError)
+      }
+
+      // Then insert new ones
+      if (teamMembers.length > 0) {
+        const teamInsertPayload = teamMembers.map((m: any) => ({
+          id: crypto.randomUUID(),
+          innovation_id: id,
+          name: m.name,
+          role: m.role,
+        }))
+        const { error: teamError } = await supabaseAdmin
+          .from('team_members')
+          .insert(teamInsertPayload)
+        if (teamError) {
+          console.error("Failed to insert team members on updateInnovation:", teamError)
+        }
+      }
+    }
+
     res.json({ data })
   } catch (err) {
     next(err)

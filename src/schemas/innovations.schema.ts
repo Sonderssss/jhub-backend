@@ -24,6 +24,10 @@ export const createSchema = z.object({
   supportRequired: z.string().optional(),
   ownerId:         z.string().uuid().optional(),
   coverImageUrl:   z.string().url().optional(),
+  teamMembers:     z.array(z.object({
+    name: z.string().min(1),
+    role: z.string().min(1)
+  })).optional(),
 })
 
 export const submitSchema = z.object({
