@@ -7,25 +7,25 @@ import { getInnovations, getFeaturedInnovations, getCategories, getInnovationByS
 
 const router = Router()
 
-// ── GET /innovations ───────────────────────────────────
+// GET /innovations
 router.get('/', validate(listQuerySchema, 'query'), getInnovations)
 
-// ── GET /innovations/featured ──────────────────────────
+// GET /innovations/featured
 router.get('/featured', getFeaturedInnovations)
 
-// ── GET /innovations/categories ────────────────────────
+// GET /innovations/categories
 router.get('/categories', getCategories)
 
-// ── GET /innovations/:slug ─────────────────────────────
+// GET /innovations/:slug
 router.get('/:slug', getInnovationBySlug)
 
-// ── POST /innovations — create public endpoint for seeding ──
+// POST /innovations
 router.post('/', validate(createSchema), createDraft)
 
-// ── POST /innovations/submit — public submission form ──
+// POST /innovations/submit
 router.post('/submit', formLimiter, validate(submitSchema), submitProposal)
 
-// ── PATCH /innovations/:id — update (owner or admin) ──
+// PATCH /innovations/:id
 router.patch('/:id', requireAuth, updateInnovation)
 
 export default router
