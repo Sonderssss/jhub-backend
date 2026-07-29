@@ -76,7 +76,7 @@ export async function getInnovationBySlug(req: Request, res: Response, next: Nex
   try {
     const { slug } = req.params
     const data = await withCache(CacheKey.innovations(slug), CacheTTL.medium, async () => {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('innovations')
         .select(`
           *,
