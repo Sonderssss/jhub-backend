@@ -11,7 +11,7 @@ export async function updateSubmissionStatus(req: Request, res: Response, next: 
       .from('innovations')
       .update({ status })
       .eq('id', id)
-      .select()
+      .select('*, team_members(*)')
       .single()
 
     if (error || !data) throw new NotFoundError('Innovation')
@@ -30,7 +30,7 @@ export async function toggleFeatured(req: Request, res: Response, next: NextFunc
       .from('innovations')
       .update({ is_featured })
       .eq('id', id)
-      .select()
+      .select('*, team_members(*)')
       .single()
 
     if (error || !data) throw new NotFoundError('Innovation')

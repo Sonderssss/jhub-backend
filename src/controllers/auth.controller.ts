@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { supabaseAdmin } from '../config/supabase.js'
+import { supabase, supabaseAdmin } from '../config/supabase.js'
 import { signToken, signRefreshToken, blacklistToken } from '../middleware/auth.middleware.js'
 
 export async function register(req: Request, res: Response, next: NextFunction) {
@@ -61,7 +61,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
   try {
     const { email, password } = req.body
 
-    const { data, error } = await supabaseAdmin.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
@@ -98,7 +98,7 @@ export async function adminLogin(req: Request, res: Response, next: NextFunction
   try {
     const { email, password } = req.body
 
-    const { data, error } = await supabaseAdmin.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })

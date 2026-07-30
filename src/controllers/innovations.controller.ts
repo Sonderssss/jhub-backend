@@ -158,7 +158,14 @@ export async function createDraft(req: Request, res: Response, next: NextFunctio
       }
     }
 
-    res.status(201).json({ data })
+    const { data: finalData, error: finalError } = await supabaseAdmin
+      .from('innovations')
+      .select('*, team_members(*)')
+      .eq('id', data.id)
+      .single()
+
+    if (finalError || !finalData) throw finalError || new NotFoundError('Innovation')
+    res.status(201).json({ data: finalData })
   } catch (err) {
     next(err)
   }
@@ -262,12 +269,15 @@ export async function updateInnovation(req: Request, res: Response, next: NextFu
       .update(updates)
       .eq('id', id)
 
-    if (req.user!.role !== 'admin') {
+    console.log("EXPRESS updateInnovation params ID:", id);
+    console.log("EXPRESS updateInnovation user:", req.user);
+    console.log("EXPRESS updateInnovation checks admin:", req.user!.role?.toLowerCase() === 'admin');
+
+    if (req.user!.role?.toLowerCase() !== 'admin') {
       query = query.eq('owner_id', req.user!.sub)
     }
 
     const { data, error } = await query.select().single()
-
     if (error || !data) throw new NotFoundError('Innovation')
 
     // Sync nested team members
@@ -299,7 +309,14 @@ export async function updateInnovation(req: Request, res: Response, next: NextFu
       }
     }
 
-    res.json({ data })
+    const { data: finalData, error: finalError } = await supabaseAdmin
+      .from('innovations')
+      .select('*, team_members(*)')
+      .eq('id', id)
+      .single()
+
+    if (finalError || !finalData) throw finalError || new NotFoundError('Innovation')
+    res.json({ data: finalData })
   } catch (err) {
     next(err)
   }
