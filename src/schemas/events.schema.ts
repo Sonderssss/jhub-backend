@@ -45,7 +45,7 @@ export const createEventSchema = z.object({
   maxCapacity:     z.coerce.number().optional(),
   registrationUrl: z.string().url().optional().or(z.literal('')),
   registrationDeadline: z.string().datetime().optional(),
-  coverImageUrl:   z.string().url().optional().or(z.literal('')),
+  coverImageUrl:   z.string().optional().or(z.literal('')),
 })
 
 export const updateEventSchema = createEventSchema.partial()

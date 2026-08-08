@@ -17,7 +17,7 @@ export const createNewsSchema = z.object({
   isPublished:   z.coerce.boolean().default(false),
   isFeatured:    z.coerce.boolean().default(false),
   publishedAt:   z.string().datetime().optional(),
-  coverImageUrl: z.string().url().optional().or(z.literal('')),
+  coverImageUrl: z.string().optional().or(z.literal('')),
   tags:          z.array(z.string()).default([]),
   authorId:      z.string().optional().or(z.literal('')),
 })

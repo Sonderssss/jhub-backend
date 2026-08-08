@@ -33,7 +33,7 @@ export const createCourseSchema = z.object({
   deliveryMode:  z.enum(['IN_PERSON', 'ONLINE', 'HYBRID']),
   durationWeeks: z.coerce.number().optional(),
   prerequisites: z.string().optional(),
-  coverImageUrl: z.string().url().optional(),
+  coverImageUrl: z.string().optional().or(z.literal('')),
   isFeatured:    z.coerce.boolean().default(false),
   isPublished:   z.coerce.boolean().default(false),
 })
@@ -45,7 +45,7 @@ export const updateCourseSchema = z.object({
   deliveryMode:  z.enum(['IN_PERSON', 'ONLINE', 'HYBRID']).optional(),
   durationWeeks: z.coerce.number().optional(),
   prerequisites: z.string().optional(),
-  coverImageUrl: z.string().url().optional().or(z.literal('')),
+  coverImageUrl: z.string().optional().or(z.literal('')),
   isFeatured:    z.coerce.boolean().optional(),
   isPublished:   z.coerce.boolean().optional(),
 })
