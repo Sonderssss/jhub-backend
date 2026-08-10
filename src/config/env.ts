@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 // import fs from 'fs'
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV || "development"}.local` });
+dotenv.config(); // Fallback to default .env if local env file doesn't exist
 
 const {
   NODE_ENV,
