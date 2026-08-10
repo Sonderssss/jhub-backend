@@ -154,6 +154,7 @@ model Innovation {
   slug            String           @unique
   title           String
   tagline         String?
+  description     String?          @db.Text
   problem         String           @db.Text
   solution        String           @db.Text
   stage           InnovationStage

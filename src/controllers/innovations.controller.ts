@@ -11,7 +11,7 @@ export async function getInnovations(req: Request, res: Response, next: NextFunc
     let query = supabase
       .from('innovations')
       .select(`
-        id, slug, title, tagline, stage, status, sector,
+        id, slug, title, tagline, description, stage, status, sector,
         is_featured, cover_image_url, created_at,
         problem, solution, support_required,
         owner:users(id, first_name, last_name),
@@ -43,7 +43,7 @@ export async function getFeaturedInnovations(req: Request, res: Response, next: 
     const data = await withCache(CacheKey.innovations('featured'), CacheTTL.medium, async () => {
       const { data, error } = await supabase
         .from('innovations')
-        .select('id, slug, title, tagline, stage, sector, cover_image_url')
+        .select('id, slug, title, tagline, description, stage, sector, cover_image_url')
         .eq('status', 'APPROVED')
         .eq('is_featured', true)
         .limit(6)
@@ -107,7 +107,7 @@ export async function createDraft(req: Request, res: Response, next: NextFunctio
     const slugify = (await import('slugify')).default
     const slug = slugify(req.body.title, { lower: true, strict: true })
 
-    const { title, tagline, problem, solution, stage, sector, categories, beneficiaries, traction, impactEvidence, supportRequired, ownerId, coverImageUrl } = req.body
+    const { title, tagline, description, problem, solution, stage, sector, categories, beneficiaries, traction, impactEvidence, supportRequired, ownerId, coverImageUrl } = req.body
 
     const owner_id = req.user?.sub || ownerId || null
     if (!owner_id) {
@@ -124,6 +124,7 @@ export async function createDraft(req: Request, res: Response, next: NextFunctio
         slug,
         title,
         tagline,
+        description,
         problem,
         solution,
         stage,
@@ -254,6 +255,7 @@ export async function updateInnovation(req: Request, res: Response, next: NextFu
     const updates: any = {}
     if (req.body.title !== undefined) updates.title = req.body.title
     if (req.body.tagline !== undefined) updates.tagline = req.body.tagline
+    if (req.body.description !== undefined) updates.description = req.body.description
     if (req.body.problem !== undefined) updates.problem = req.body.problem
     if (req.body.solution !== undefined) updates.solution = req.body.solution
     if (req.body.stage !== undefined) updates.stage = req.body.stage

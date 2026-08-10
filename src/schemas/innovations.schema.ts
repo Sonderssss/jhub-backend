@@ -13,6 +13,7 @@ export const listQuerySchema = z.object({
 export const createSchema = z.object({
   title:           z.string().min(3).max(120),
   tagline:         z.string().max(200).optional(),
+  description:     z.string().optional(),
   problem:         z.string().min(10),
   solution:        z.string().min(10),
   stage:           z.enum(['IDEA','PROTOTYPE','PILOT','SCALING','MATURE']),
