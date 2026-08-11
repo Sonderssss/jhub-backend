@@ -19,5 +19,6 @@
     "paths": {
       "@/*": ["src/*"]
     }
-  }
+  },
+  "exclude": ["scratch", "node_modules", "dist"]
 }
